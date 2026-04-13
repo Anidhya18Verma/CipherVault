@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+{% block title %}Login – CipherVault{% endblock %}
+{% block content %}
+
+<section class="auth-section">
+    <div class="auth-bg">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+    </div>
+    <div class="auth-card">
+        <div class="auth-header">
+            <a href="/" class="auth-logo"><span class="logo-icon">⬡</span> CipherVault</a>
+            <h1>Welcome back</h1>
+            <p>Enter your credentials to access your vault.</p>
+        </div>
+
+        <div id="auth-error" class="alert alert-error hidden"></div>
+        <div id="auth-success" class="alert alert-success hidden"></div>
+
+        <form id="login-form" onsubmit="handleLogin(event)">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" placeholder="your_username" required autocomplete="username">
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <div class="input-wrap">
+                    <input type="password" id="password" name="password" placeholder="••••••••" required autocomplete="current-password">
+                    <button type="button" class="toggle-pw" onclick="togglePassword('password')">👁</button>
+                </div>
+            </div>
+            <button type="submit" class="btn-primary btn-lg btn-full" id="login-btn">
+                <span id="login-btn-text">Unlock Vault →</span>
+                <span id="login-spinner" class="spinner hidden"></span>
+            </button>
+        </form>
+
+        <p class="auth-footer">Don't have an account? <a href="/register">Create one free →</a></p>
+    </div>
+</section>
+
+<script>
+async function handleLogin(e) {
+    e.preventDefault();
+    const btn = document.getElementById('login-btn');
+    const btnText = document.getElementById('login-btn-text');
+    const spinner = document.getElementById('login-spinner');
+    const errorDiv = document.getElementById('auth-error');
+    const successDiv = document.getElementById('auth-success');
+
+    errorDiv.classList.add('hidden');
+    successDiv.classList.add('hidden');
+    btn.disabled = true;
+    btnText.textContent = 'Authenticating...';
+
+    const username = document.getElementById('username').value.trim();
+    const password = document.getElementById('password').value;
+
+    try {
+        const res = await fetch('/api/auth/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password })
+        });
+        const data = await res.json();
+
+        if (res.ok) {
+            localStorage.setItem('cv_token', data.token);
+            localStorage.setItem('cv_user', JSON.stringify(data.user));
+            successDiv.textContent = '✓ Login successful! Redirecting...';
+            successDiv.classList.remove('hidden');
+            setTimeout(() => window.location.href = '/dashboard', 800);
+        } else {
+            errorDiv.textContent = '✕ ' + (data.error || 'Login failed');
+            errorDiv.classList.remove('hidden');
+            btn.disabled = false;
+            btnText.textContent = 'Unlock Vault →';
+        }
+    } catch (err) {
+        errorDiv.textContent = '✕ Network error. Please try again.';
+        errorDiv.classList.remove('hidden');
+        btn.disabled = false;
+        btnText.textContent = 'Unlock Vault →';
+    }
+}
+
+function togglePassword(id) {
+    const input = document.getElementById(id);
+    input.type = input.type === 'password' ? 'text' : 'password';
+}
+</script>
+{% endblock %}

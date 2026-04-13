@@ -1,0 +1,153 @@
+{% extends 'base.html' %}
+{% block title %}Admin Panel – CipherVault{% endblock %}
+{% block content %}
+
+<div class="admin-layout">
+    <div class="admin-header-bar">
+        <div class="admin-header-left">
+            <span class="admin-badge">👑 ADMIN</span>
+            <h1>Admin Panel</h1>
+            <p>System overview — not visible in navigation</p>
+        </div>
+        <button class="btn-ghost" onclick="logout()">Logout</button>
+    </div>
+
+    <div id="admin-error" class="alert alert-error hidden" style="margin:1rem 2rem"></div>
+    <div id="admin-access-denied" class="admin-denied hidden">
+        <div class="empty-icon">🚫</div>
+        <h3>Access Denied</h3>
+        <p>Admin credentials required. Please login with an admin account.</p>
+        <a href="/login" class="btn-primary">Login</a>
+    </div>
+
+    <div id="admin-content" class="hidden">
+        <!-- Stats -->
+        <div class="admin-stats">
+            <div class="admin-stat-card">
+                <span class="stat-big" id="admin-total-users">—</span>
+                <span>Total Users</span>
+            </div>
+            <div class="admin-stat-card">
+                <span class="stat-big" id="admin-total-notes">—</span>
+                <span>Total Notes</span>
+            </div>
+            <div class="admin-stat-card">
+                <span class="stat-big" id="admin-total-favs">—</span>
+                <span>Favorited</span>
+            </div>
+        </div>
+
+        <!-- Users Table -->
+        <div class="admin-section">
+            <h2>All Users</h2>
+            <div class="admin-table-wrap">
+                <table class="admin-table" id="users-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Username</th>
+                            <th>Email</th>
+                            <th>Role</th>
+                            <th>Joined</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="users-tbody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Notes Table -->
+        <div class="admin-section">
+            <h2>All Notes (encrypted)</h2>
+            <div class="admin-table-wrap">
+                <table class="admin-table" id="notes-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Owner</th>
+                            <th>Title</th>
+                            <th>Favorite</th>
+                            <th>Created</th>
+                        </tr>
+                    </thead>
+                    <tbody id="notes-tbody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+(async function initAdmin() {
+    const token = localStorage.getItem('cv_token');
+    if (!token) {
+        document.getElementById('admin-access-denied').classList.remove('hidden');
+        return;
+    }
+
+    // Fetch users
+    const [usersRes, notesRes] = await Promise.all([
+        fetch('/api/admin/users', { headers: { Authorization: 'Bearer ' + token } }),
+        fetch('/api/admin/notes', { headers: { Authorization: 'Bearer ' + token } })
+    ]);
+
+    if (usersRes.status === 403 || usersRes.status === 401) {
+        document.getElementById('admin-access-denied').classList.remove('hidden');
+        return;
+    }
+
+    const usersData = await usersRes.json();
+    const notesData = await notesRes.json();
+
+    document.getElementById('admin-content').classList.remove('hidden');
+
+    const users = usersData.users || [];
+    const notes = notesData.notes || [];
+
+    document.getElementById('admin-total-users').textContent = users.length;
+    document.getElementById('admin-total-notes').textContent = notes.length;
+    document.getElementById('admin-total-favs').textContent = notes.filter(n => n.is_favorite).length;
+
+    // Render users
+    const usersTbody = document.getElementById('users-tbody');
+    usersTbody.innerHTML = users.map(u => `
+        <tr>
+            <td>${u.id}</td>
+            <td><strong>${u.username}</strong></td>
+            <td>${u.email}</td>
+            <td><span class="role-badge ${u.is_admin ? 'role-admin' : 'role-user'}">${u.is_admin ? '👑 Admin' : '👤 User'}</span></td>
+            <td>${new Date(u.created_at).toLocaleDateString()}</td>
+            <td>${u.is_admin ? '<span class="protected-label">Protected</span>' : `<button class="btn-delete-sm" onclick="deleteUser(${u.id})">Delete</button>`}</td>
+        </tr>
+    `).join('');
+
+    // Render notes
+    const notesTbody = document.getElementById('notes-tbody');
+    notesTbody.innerHTML = notes.map(n => `
+        <tr>
+            <td>${n.id}</td>
+            <td>${n.owner_username}</td>
+            <td>${n.title}</td>
+            <td>${n.is_favorite ? '⭐' : '—'}</td>
+            <td>${new Date(n.created_at).toLocaleDateString()}</td>
+        </tr>
+    `).join('');
+})();
+
+async function deleteUser(userId) {
+    if (!confirm('Delete this user and all their notes?')) return;
+    const token = localStorage.getItem('cv_token');
+    const res = await fetch('/api/admin/users/' + userId, {
+        method: 'DELETE',
+        headers: { Authorization: 'Bearer ' + token }
+    });
+    if (res.ok) {
+        location.reload();
+    } else {
+        const d = await res.json();
+        alert('Error: ' + (d.error || 'Failed'));
+    }
+}
+</script>
+{% endblock %}

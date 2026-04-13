@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+{% block title %}Contact – CipherVault{% endblock %}
+{% block content %}
+
+<section class="page-hero">
+    <div class="container">
+        <div class="page-hero-content">
+            <div class="section-tag">Contact</div>
+            <h1>Get in touch.</h1>
+            <p>Have questions about the project, the encryption model, or the API? Send us a message.</p>
+        </div>
+    </div>
+</section>
+
+<section class="section-contact">
+    <div class="container">
+        <div class="contact-grid">
+            <div class="contact-info">
+                <div class="contact-item">
+                    <div class="contact-icon">📧</div>
+                    <div>
+                        <h4>Email</h4>
+                        <p>anidhyaverma03@gmail.com</p>
+                    </div>
+                </div>
+                <div class="contact-item">
+                    <div class="contact-icon">🌐</div>
+                    <div>
+                        <h4>GitHub</h4>
+                        <p>github.com/CipherVault</p>
+                    </div>
+                </div>
+                <div class="contact-item">
+                    <div class="contact-icon">🏫</div>
+                    <div>
+                        <h4>Project</h4>
+                        <p>University Final Year Project</p>
+                    </div>
+                </div>
+            </div>
+            <div class="contact-form-wrap">
+                <form class="contact-form" id="contact-form" onsubmit="handleContactForm(event)">
+                    <div class="form-group">
+                        <label for="c-name">Your Name</label>
+                        <input type="text" id="c-name" placeholder="Jane Doe" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="c-email">Email</label>
+                        <input type="email" id="c-email" placeholder="jane@example.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="c-message">Message</label>
+                        <textarea id="c-message" rows="5" placeholder="Your message..." required></textarea>
+                    </div>
+                    <button type="submit" class="btn-primary btn-lg" style="width:100%">Send Message →</button>
+                    <div id="contact-success" class="success-msg hidden">✓ Message sent! We'll get back to you soon.</div>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+function handleContactForm(e) {
+    e.preventDefault();
+    document.getElementById('contact-success').classList.remove('hidden');
+    document.getElementById('contact-form').reset();
+    setTimeout(() => document.getElementById('contact-success').classList.add('hidden'), 4000);
+}
+</script>
+
+{% endblock %}

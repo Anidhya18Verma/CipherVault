@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard – CipherVault{% endblock %}
+{% block content %}
+
+<div class="dashboard-layout" id="dashboard-layout">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="sidebar-user" id="sidebar-user">
+            <div class="user-avatar" id="user-avatar">?</div>
+            <div class="user-info">
+                <span class="user-name" id="user-name">Loading...</span>
+                <span class="user-role">Vault Owner</span>
+            </div>
+        </div>
+        <nav class="sidebar-nav">
+            <button class="sidebar-btn active" onclick="showAll()">
+                <span>📋</span> All Notes
+                <span class="note-count" id="all-count">0</span>
+            </button>
+            <button class="sidebar-btn" onclick="showFavorites()">
+                <span>⭐</span> Favorites
+                <span class="note-count" id="fav-count">0</span>
+            </button>
+        </nav>
+        <button class="btn-primary sidebar-add-btn" onclick="openModal()">+ New Note</button>
+        <button class="sidebar-logout-btn" onclick="logout()">🚪 Logout</button>
+    </aside>
+
+    <!-- Main content -->
+    <main class="dashboard-main">
+        <div class="dashboard-header">
+            <div>
+                <h1 id="vault-title">All Notes</h1>
+                <p id="vault-subtitle">Your encrypted private notes</p>
+            </div>
+            <button class="btn-primary" onclick="openModal()">+ New Note</button>
+        </div>
+
+        <div id="notes-loading" class="notes-loading">
+            <div class="loading-spinner"></div>
+            <p>Decrypting your vault...</p>
+        </div>
+
+        <div id="notes-empty" class="notes-empty hidden">
+            <div class="empty-icon">🔐</div>
+            <h3>Your vault is empty</h3>
+            <p>Add your first encrypted note to get started.</p>
+            <button class="btn-primary" onclick="openModal()">Create First Note</button>
+        </div>
+
+        <div class="notes-grid" id="notes-grid"></div>
+    </main>
+</div>
+
+<!-- Add Note Modal -->
+<div class="modal-overlay hidden" id="modal-overlay" onclick="closeModalOutside(event)">
+    <div class="modal-card" id="modal-card">
+        <div class="modal-header">
+            <h2>New Encrypted Note</h2>
+            <button class="modal-close" onclick="closeModal()">✕</button>
+        </div>
+        <div id="modal-error" class="alert alert-error hidden"></div>
+        <form id="note-form" onsubmit="handleCreateNote(event)">
+            <div class="form-group">
+                <label for="note-title">Title</label>
+                <input type="text" id="note-title" placeholder="Note title..." required maxlength="200">
+            </div>
+            <div class="form-group">
+                <label for="note-content">Content</label>
+                <textarea id="note-content" rows="6" placeholder="Write your secret here. It will be encrypted before saving..." required></textarea>
+            </div>
+            <div class="form-group checkbox-group">
+                <label class="checkbox-label">
+                    <input type="checkbox" id="note-favorite">
+                    <span>⭐ Mark as favorite</span>
+                </label>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn-ghost" onclick="closeModal()">Cancel</button>
+                <button type="submit" class="btn-primary" id="save-note-btn">
+                    <span id="save-note-text">🔒 Encrypt & Save</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- View Note Modal -->
+<div class="modal-overlay hidden" id="view-modal-overlay" onclick="closeViewModalOutside(event)">
+    <div class="modal-card" id="view-modal-card">
+        <div class="modal-header">
+            <h2 id="view-note-title">Note</h2>
+            <button class="modal-close" onclick="closeViewModal()">✕</button>
+        </div>
+        <div class="view-note-meta">
+            <span id="view-note-date"></span>
+            <span id="view-note-fav"></span>
+        </div>
+        <div class="view-note-content" id="view-note-content"></div>
+        <div class="modal-actions">
+            <button class="btn-ghost" onclick="closeViewModal()">Close</button>
+        </div>
+    </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/vault.js') }}"></script>
+<script>
+// Guard: redirect if not logged in
+(function() {
+    const token = localStorage.getItem('cv_token');
+    if (!token) window.location.href = '/login';
+})();
+</script>
+{% endblock %}

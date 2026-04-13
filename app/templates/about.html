@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{% block title %}About – CipherVault{% endblock %}
+{% block content %}
+
+<section class="page-hero">
+    <div class="container">
+        <div class="page-hero-content">
+            <div class="section-tag">About CipherVault</div>
+            <h1>Built for privacy.<br>Engineered for trust.</h1>
+            <p>CipherVault is a university project demonstrating secure backend design: JWT authentication, Fernet encryption, and a clean REST API – all wrapped in a production-ready Flask application.</p>
+        </div>
+    </div>
+</section>
+
+<section class="section-about">
+    <div class="container">
+        <div class="about-grid">
+            <div class="about-card">
+                <div class="about-icon">🔐</div>
+                <h3>Zero Plaintext Storage</h3>
+                <p>Every note is encrypted with Fernet (AES-128-CBC + HMAC-SHA256) before touching the database. Raw content never persists.</p>
+            </div>
+            <div class="about-card">
+                <div class="about-icon">🎫</div>
+                <h3>Stateless JWT Auth</h3>
+                <p>No server-side sessions. Every request is verified via signed JSON Web Tokens, making the system horizontally scalable.</p>
+            </div>
+            <div class="about-card">
+                <div class="about-icon">🛡️</div>
+                <h3>Role-Based Access</h3>
+                <p>Regular users manage their own vault. Admins can view all users and notes through a hidden panel inaccessible from navigation.</p>
+            </div>
+            <div class="about-card">
+                <div class="about-icon">🚀</div>
+                <h3>Render-Ready</h3>
+                <p>Configured for deployment on Render with Gunicorn, environment variables, and optional PostgreSQL support.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="section-tech">
+    <div class="container">
+        <h2 class="section-title">Tech Stack</h2>
+        <div class="tech-list">
+            <div class="tech-item"><span class="tech-badge">Python</span><span>Flask 3.0</span></div>
+            <div class="tech-item"><span class="tech-badge">Auth</span><span>Flask-JWT-Extended</span></div>
+            <div class="tech-item"><span class="tech-badge">Crypto</span><span>Fernet (cryptography)</span></div>
+            <div class="tech-item"><span class="tech-badge">DB</span><span>SQLite / PostgreSQL</span></div>
+            <div class="tech-item"><span class="tech-badge">ORM</span><span>Flask-SQLAlchemy</span></div>
+            <div class="tech-item"><span class="tech-badge">Server</span><span>Gunicorn</span></div>
+            <div class="tech-item"><span class="tech-badge">Frontend</span><span>HTML/CSS/JS + Jinja2</span></div>
+            <div class="tech-item"><span class="tech-badge">Deploy</span><span>Render.com</span></div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}
